@@ -1,58 +1,4 @@
 <%
--- 1. 公历日期
-local solar_date = luci.sys.exec("echo -n `date +'%Y.%m.%d'`")
-
--- 2. 天干地支 + 生肖 + 生肖表情
-local ganzhi_zodiac = luci.sys.exec([[
-export LANG=zh_CN.UTF-8
-year=$(date +%Y)
-gan=("甲" "乙" "丙" "丁" "戊" "己" "庚" "辛" "壬" "癸")
-zhi=("子" "丑" "寅" "卯" "辰" "巳" "午" "未" "申" "酉" "戌" "亥")
-zodiac=("鼠" "牛" "虎" "兔" "龙" "蛇" "马" "羊" "猴" "鸡" "狗" "猪")
-emoji=("🐭" "🐮" "🐯" "🐰" "🐉" "🐍" "🐎" "🐑" "🐵" "🐔" "🐶" "🐷")
-g=$(( (year - 4) % 10 ))
-z=$(( (year - 4) % 12 ))
-echo -n "${gan[g]}${zhi[z]}${zodiac[z]}${emoji[z]}年"
-]])
-
--- 3. 农历日期（标准中文：三月廿九）
-local lunar_date = luci.sys.exec([[
-export LANG=zh_CN.UTF-8
-nl=$(date +%m-%d | awk -F '-' '{print $1"月"$2"日"}')
-echo $nl | awk '{
-    gsub(/01/,"正");gsub(/02/,"二");gsub(/03/,"三");gsub(/04/,"四");
-    gsub(/05/,"五");gsub(/06/,"六");gsub(/07/,"七");gsub(/08/,"八");
-    gsub(/09/,"九");gsub(/10/,"十");gsub(/11/,"十一");gsub(/12/,"十二");
-    gsub(/-01/,"初一");gsub(/-02/,"初二");gsub(/-03/,"初三");gsub(/-04/,"初四");
-    gsub(/-05/,"初五");gsub(/-06/,"初六");gsub(/-07/,"初七");gsub(/-08/,"初八");
-    gsub(/-09/,"初九");gsub(/-10/,"初十");gsub(/-11/,"十一");gsub(/-12/,"十二");
-    gsub(/-13/,"十三");gsub(/-14/,"十四");gsub(/-15/,"十五");gsub(/-16/,"十六");
-    gsub(/-17/,"十七");gsub(/-18/,"十八");gsub(/-19/,"十九");gsub(/-20/,"二十");
-    gsub(/-21/,"廿一");gsub(/-22/,"廿二");gsub(/-23/,"廿三");gsub(/-24/,"廿四");
-    gsub(/-25/,"廿五");gsub(/-26/,"廿六");gsub(/-27/,"廿七");gsub(/-28/,"廿八");
-    gsub(/-29/,"廿九");gsub(/-30/,"三十");gsub(/月-/,"月");
-    print
-}') | xargs echo -n
-]])
-
--- 4. 24节气 + 前后不同专属表情
-local term_with_emoji = luci.sys.exec([[
-export LANG=zh_CN.UTF-8
-n=$(date +%j)
-y=$(date +%Y)
-s1=$((y*5/4-436))
-term=(小寒 大寒 立春 雨水 惊蛰 春分 清明 谷雨 立夏 小满 芒种 夏至 小暑 大暑 立秋 处暑 白露 秋分 寒露 霜降 立冬 小雪 大雪 冬至)
-emojiPre=(❄️ 🧊 🌱 💦 ⚡ 🌤️ 🌷 🌧️ 🌻 🌾 🌿 ☀️ 🔥 🥵 🍃 🌬️ 💧 🍂 🍁 🧊 🌨️ ❄️ ☃️ 🌙)
-emojiSuf=(⛄ ❄️ 🌳 💧 🐛 🕊️ 🪁 🌱 ☀️ 🥜 🌾 🔥 🥵 🌞 🍂 🍃 🌫️ 🍁 💧 🧊 🥶 ⛄ ❄️ ❄️)
-
-d1=$(( (s1+49)%30 ))
-pos=$(( (n - d1 + 15)/15 ))
-if [ $pos -lt 0 ]; then pos=0; fi
-if [ $pos -ge 24 ]; then pos=23; fi
-echo -n "${emojiPre[$pos]}${term[$pos]}${emojiSuf[$pos]}"
-]])
-
--- 显示判断
 if luci.sys.exec("echo -n `uci -q get base_config.@status[0].links`") ~= "0" then
 %>
 <script>
@@ -70,7 +16,7 @@ if luci.sys.exec("echo -n `uci -q get base_config.@status[0].links`") ~= "0" the
                     </div>
                     <div class="td left">
                         <a href="https://github.com/HDragon8/openwrt" target="_blank" style="color:orangered;font-weight:bold;">
-                            侯永华 @ <%=ganzhi_zodiac%> 农历<%=lunar_date%> ${randomEmoji1}<%=solar_date%>${randomEmoji2} <%=term_with_emoji%>
+                            侯永华 @ 丙午马🐎年 四月十四 ${randomEmoji1}2026.05.30${randomEmoji2} 🌾小满🌼
                         </a>
                     </div>
                 </div>
